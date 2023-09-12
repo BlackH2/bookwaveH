@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Upload and Download</title>
+</head>
+<body>
+    <h1>Upload and Download PDF</h1>
+    <form action="upload" id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="pdfFile" accept=".pdf">
+        <input type="text" id="uploadFilenameInput" placeholder="Enter PDF Filename">
+        <button type="submit">Upload PDF</button>
+    </form>
+    <div id="message"></div>
+    <a id="downloadLink" href="#" style="display: none;">Download PDF</a>
+    <form id="downloadForm">
+        <input type="text" id="downloadFilenameInput" placeholder="Enter PDF Filename">
+        <button type="submit">Download PDF</button>
+    </form>
+    <div id="downloadMessage"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const uploadForm = document.getElementById("uploadForm");
+    const downloadForm = document.getElementById("downloadForm");
+    const messageDiv = document.getElementById("message");
+    const downloadMessageDiv = document.getElementById("downloadMessage");
+    const downloadLink = document.getElementById("downloadLink");
+    const uploadFilenameInput = document.getElementById("uploadFilenameInput");
+    const downloadFilenameInput = document.getElementById("downloadFilenameInput");
+
+    uploadForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(uploadForm);
+        formData.append("filename", uploadFilenameInput.value);
+
+        fetch("/upload", {
+            method: "POST",
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                messageDiv.textContent = data.message;
+                if (data.success) {
+                    downloadLink.href = `/download/${data.filename}`;
+                    downloadLink.style.display = "block";
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    });
+
+    downloadForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const filename = downloadFilenameInput.value;
+        if (filename) {
+            window.location.href = `/download/${filename}`;
+        } else {
+            downloadMessageDiv.textContent = "Please enter a filename.";
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
